@@ -373,6 +373,9 @@
       </div>
 
       <div class="btn-group">
+        <button class="btn" id="share-meme-btn" title="মেমে সেভ ও শেয়ার করুন">
+          📸 <span class="hide-mobile">মেমে শেয়ার</span>
+        </button>
         <button class="btn" id="face-btn" title="কাস্টম মুখ বসান">
           👤 <span class="hide-mobile">মুখ বসান</span>
         </button>
@@ -390,6 +393,14 @@
 
     <!-- Bottom Controls & Selector -->
     <div class="bottom-bar interactive">
+      <!-- Weapon Arsenal Selector -->
+      <div class="character-scroller" id="weapon-scroller" style="background: rgba(30, 41, 59, 0.85); border-color: rgba(245, 158, 11, 0.3);">
+        <div class="char-card active" data-weapon="hand">👋 কষে চড়</div>
+        <div class="char-card" data-weapon="chappal">👡 বাটার স্যান্ডেল</div>
+        <div class="char-card" data-weapon="broom">🧹 ঝাড়ু পেটা</div>
+        <div class="char-card" data-weapon="sweet_pot">🍯 মিষ্টির হাড়ি</div>
+      </div>
+
       <div class="character-scroller" id="character-scroller">
         <!-- Will be populated by TS -->
       </div>

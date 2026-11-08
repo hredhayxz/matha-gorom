@@ -7,6 +7,8 @@ import { CharacterFactory, CHARACTER_CATALOG, CharacterDef } from './engine/Char
 import { PropsDebrisEngine } from './engine/PropsDebrisEngine';
 import { SoundEngine } from './engine/SoundEngine';
 import { FaceSwap } from './engine/FaceSwap';
+import { WeaponArsenal, WeaponType } from './engine/WeaponArsenal';
+import { MemeSharer } from './engine/MemeSharer';
 
 export class GameApp {
   public sceneManager: SceneManager;
@@ -16,9 +18,12 @@ export class GameApp {
   public propsDebrisEngine: PropsDebrisEngine;
   public soundEngine: SoundEngine;
   public faceSwap: FaceSwap;
+  public weaponArsenal: WeaponArsenal;
+  public memeSharer: MemeSharer;
   public ragdoll: Ragdoll;
   public combatEngine: CombatEngine;
   public currentCharacter: CharacterDef = CHARACTER_CATALOG[0];
+  public lastSpokenLine: string = '';
   private lastTime: number = performance.now();
 
   constructor() {
@@ -31,6 +36,8 @@ export class GameApp {
     this.characterFactory = new CharacterFactory(this.sceneManager.scene, this.physicsWorld.world);
     this.propsDebrisEngine = new PropsDebrisEngine(this.sceneManager.scene, this.physicsWorld.world);
     this.soundEngine = new SoundEngine();
+    this.weaponArsenal = new WeaponArsenal(this.sceneManager, this.physicsWorld.world);
+    this.memeSharer = new MemeSharer(canvas);
 
     // Initial character
     this.ragdoll = this.characterFactory.createCharacter(this.currentCharacter);
@@ -58,6 +65,7 @@ export class GameApp {
     const superBtn = document.getElementById('super-btn');
     const resetBtn = document.getElementById('reset-btn');
     const soundBtn = document.getElementById('sound-btn');
+    const memeBtn = document.getElementById('share-meme-btn');
 
     slapBtn?.addEventListener('click', () => {
       this.handleHit('slap');
@@ -84,6 +92,27 @@ export class GameApp {
       }
     });
 
+    memeBtn?.addEventListener('click', () => {
+      this.memeSharer.captureAndShare(
+        this.currentCharacter.bengaliName,
+        this.lastSpokenLine || this.currentCharacter.defaultDialogue
+      );
+    });
+
+    // Weapon Arsenal selector
+    const weaponCards = document.querySelectorAll('#weapon-scroller .char-card');
+    weaponCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        weaponCards.forEach((c) => c.classList.remove('active'));
+        card.classList.add('active');
+        const weaponId = card.getAttribute('data-weapon') as WeaponType;
+        if (weaponId) {
+          this.weaponArsenal.setWeapon(weaponId);
+          this.sceneManager.triggerCameraShake(0.1);
+        }
+      });
+    });
+
     // Populate character scroller
     const scroller = document.getElementById('character-scroller');
     if (scroller) {
@@ -103,7 +132,7 @@ export class GameApp {
         card.innerHTML = `<span>${icon}</span> <span>${char.bengaliName}</span>`;
         card.addEventListener('click', () => {
           this.switchCharacter(char);
-          document.querySelectorAll('.char-card').forEach((c) => c.classList.remove('active'));
+          document.querySelectorAll('#character-scroller .char-card').forEach((c) => c.classList.remove('active'));
           card.classList.add('active');
         });
         scroller.appendChild(card);
@@ -123,6 +152,18 @@ export class GameApp {
 
   private handleHit(type: 'slap' | 'kick' | 'super'): void {
     const headPos = this.ragdoll.parts['head'].mesh.position;
+
+    // Launch active weapon projectile
+    if (this.weaponArsenal.activeWeapon !== 'hand') {
+      this.weaponArsenal.launchWeapon(headPos);
+      if (this.weaponArsenal.activeWeapon === 'chappal') {
+        this.soundEngine.playChappal();
+      } else if (this.weaponArsenal.activeWeapon === 'broom') {
+        this.soundEngine.playBroom();
+      } else if (this.weaponArsenal.activeWeapon === 'sweet_pot') {
+        this.soundEngine.playPotShatter();
+      }
+    }
 
     // Trigger character-specific slapstick debris & sounds
     if (this.currentCharacter.id === 'colleague') {
@@ -144,7 +185,7 @@ export class GameApp {
 
     if (type === 'slap') {
       this.combatEngine.triggerSlap();
-      this.soundEngine.playSlap();
+      if (this.weaponArsenal.activeWeapon === 'hand') this.soundEngine.playSlap();
     } else if (type === 'kick') {
       this.combatEngine.triggerDropkick();
       this.soundEngine.playDropkick();
@@ -161,6 +202,7 @@ export class GameApp {
   }
 
   private showSpeech(text: string): void {
+    this.lastSpokenLine = text;
     const container = document.getElementById('speech-bubble-container');
     if (!container) return;
 
@@ -199,6 +241,7 @@ export class GameApp {
       this.ragdoll.update(deltaTime);
       this.characterFactory.updateChairPhysics();
       this.propsDebrisEngine.update(deltaTime);
+      this.weaponArsenal.update(deltaTime);
     }
 
     this.combatEngine.update(deltaTime);

@@ -30,6 +30,7 @@ export class SceneManager {
       antialias: true,
       powerPreference: 'high-performance',
       stencil: false,
+      preserveDrawingBuffer: true,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

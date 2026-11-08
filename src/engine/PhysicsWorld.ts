@@ -44,3 +44,4 @@ export class PhysicsWorld {
     this.world.step(fixedTimeStep, deltaTime, 3);
   }
 }
+

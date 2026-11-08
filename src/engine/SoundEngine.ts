@@ -222,7 +222,48 @@ export class SoundEngine {
     }
   }
 
-  // Comical audio blip backing voice lines
+  // --- 8. Weapon Sound FX: Chappal, Broom, Sweet Pot ---
+  public playChappal(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    // Loud rubber snap
+    this.playSlap();
+    this.playNoiseBurst(0.08, 0.9, 3600);
+  }
+
+  public playBroom(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    // Swoosh brush
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, t);
+    osc.frequency.exponentialRampToValueAtTime(100, t + 0.18);
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.2);
+
+    this.playNoiseBurst(0.18, 0.5, 1800);
+  }
+
+  public playPotShatter(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    this.playDropkick();
+    this.playNoiseBurst(0.25, 0.8, 4800);
+  }
+
   private playCartoonBabble(): void {
     if (!this.hasInitialized) return;
     this.initContext();
@@ -245,3 +286,4 @@ export class SoundEngine {
     });
   }
 }
+
