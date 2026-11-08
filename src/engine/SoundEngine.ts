@@ -4,7 +4,7 @@ export class SoundEngine {
   private hasInitialized: boolean = false;
 
   constructor() {
-    // AudioContext will be created on first touch/click
+    // AudioContext will be initialized on first user interaction
   }
 
   private initContext(): void {
@@ -23,15 +23,146 @@ export class SoundEngine {
     return this.isMuted;
   }
 
-  // --- 1. Cartoon Slap Thud ---
+  // --- 1. Realistic Bengali Voice Speech Engine (Male vs Female) ---
+  public speakBengaliVoice(text: string, gender: 'male' | 'female' = 'male'): void {
+    if (this.isMuted) return;
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // Stop overlap
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+
+      // Find authentic Bengali voices
+      const bengaliVoices = voices.filter(
+        (v) => v.lang.startsWith('bn') || v.lang.includes('Bengali') || v.name.toLowerCase().includes('bangla')
+      );
+
+      if (gender === 'female') {
+        // Realistic Female Voice
+        utterance.pitch = 1.15; // Natural realistic female pitch
+        utterance.rate = 1.05;  // Authentic gossipy conversational cadence
+        
+        // Match female voice if available in system
+        const femaleVoice = bengaliVoices.find(
+          (v) => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') || v.name.includes('Aditi')
+        ) || bengaliVoices[0];
+
+        if (femaleVoice) utterance.voice = femaleVoice;
+      } else {
+        // Realistic Male Voice
+        utterance.pitch = 0.88; // Deep resonant natural adult male chest pitch
+        utterance.rate = 1.0;   // Confident/panicked human cadence
+        
+        // Match male voice if available
+        const maleVoice = bengaliVoices.find(
+          (v) => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('man') || v.name.includes('Kunal')
+        ) || bengaliVoices[0];
+
+        if (maleVoice) utterance.voice = maleVoice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    } else {
+      // Natural human formant synthesis fallback
+      this.playHumanVocalFormant(gender);
+    }
+  }
+
+  // Procedural Human Vocal Formant Synthesis (Glottal Pulse + F1/F2 Resonances)
+  private playHumanVocalFormant(gender: 'male' | 'female'): void {
+    if (!this.hasInitialized) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const baseFreq = gender === 'female' ? 220 : 120; // Authentic male/female fundamental frequency F0
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sawtooth'; // Rich vocal tract harmonics
+    osc.frequency.setValueAtTime(baseFreq, t);
+
+    // Vocal Tract Formant Filter (Ah / Oh vowel formant simulation)
+    const filter = this.ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(gender === 'female' ? 950 : 700, t);
+    filter.Q.setValueAtTime(4.0, t);
+
+    gain.gain.setValueAtTime(0.2, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(t);
+    osc.stop(t + 0.26);
+  }
+
+  // --- 2. Authentic Dhaka Vehicle Horns ---
+  // A. Classic Dhaka Bus Dual-Tone Air Horn ("প্যাঁ-প্যাঁ-পোঁ!")
+  public playBusAirHorn(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const tone1 = this.ctx.createOscillator();
+    const tone2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    tone1.type = 'sawtooth';
+    tone2.type = 'sawtooth';
+    tone1.frequency.setValueAtTime(370, t); // High horn harmonic
+    tone2.frequency.setValueAtTime(440, t); // Concordant horn blast
+
+    gain.gain.setValueAtTime(0.25, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.35);
+
+    tone1.connect(gain);
+    tone2.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    tone1.start(t);
+    tone2.start(t);
+    tone1.stop(t + 0.36);
+    tone2.stop(t + 0.36);
+  }
+
+  // B. Authentic Cycle-Rickshaw Double Bell ("টুং-টাং!")
+  public playRickshawBell(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const bellFrequencies = [1760, 2093]; // A6 & C7 clear brass bell tones
+    bellFrequencies.forEach((freq, idx) => {
+      const t = this.ctx!.currentTime + idx * 0.12;
+      const osc = this.ctx!.createOscillator();
+      const gain = this.ctx!.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+
+      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+
+      osc.connect(gain);
+      gain.connect(this.ctx!.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.23);
+    });
+  }
+
+  // --- 3. Combat Sound FX ---
   public playSlap(): void {
     if (this.isMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
     const t = this.ctx.currentTime;
-
-    // A. Punchy Sine Pitch-drop
     const osc = this.ctx.createOscillator();
     const oscGain = this.ctx.createGain();
     osc.type = 'triangle';
@@ -46,18 +177,15 @@ export class SoundEngine {
     osc.start(t);
     osc.stop(t + 0.13);
 
-    // B. Noise Snap (sharp hand slap transient)
     this.playNoiseBurst(0.06, 0.7, 2400);
   }
 
-  // --- 2. Heavy Dropkick Boom ---
   public playDropkick(): void {
     if (this.isMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
     const t = this.ctx.currentTime;
-
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sine';
@@ -75,7 +203,6 @@ export class SoundEngine {
     this.playNoiseBurst(0.15, 0.9, 1200);
   }
 
-  // --- 3. Cartoon Whistle Launch ---
   public playWhistleLaunch(): void {
     if (this.isMuted) return;
     this.initContext();
@@ -98,7 +225,6 @@ export class SoundEngine {
     osc.stop(t + 0.46);
   }
 
-  // --- 4. Metallic Trashcan Clatter ---
   public playMetallicClatter(): void {
     if (this.isMuted) return;
     this.initContext();
@@ -123,7 +249,6 @@ export class SoundEngine {
     this.playNoiseBurst(0.2, 0.6, 3200);
   }
 
-  // --- 5. Keyboard Plastic Snap ---
   public playKeyboardSmash(): void {
     if (this.isMuted) return;
     this.initContext();
@@ -136,15 +261,12 @@ export class SoundEngine {
     }
   }
 
-  // --- 6. Super Finisher Explosion ---
   public playSuperFinisher(): void {
     if (this.isMuted) return;
     this.initContext();
     if (!this.ctx) return;
 
     const t = this.ctx.currentTime;
-
-    // Power riser
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
     osc.type = 'sawtooth';
@@ -165,7 +287,39 @@ export class SoundEngine {
     }, 600);
   }
 
-  // Helper: Synthesized Noise Burst
+  public playChappal(): void {
+    if (this.isMuted) return;
+    this.playSlap();
+    this.playNoiseBurst(0.08, 0.9, 3600);
+  }
+
+  public playBroom(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, t);
+    osc.frequency.exponentialRampToValueAtTime(100, t + 0.18);
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + 0.2);
+
+    this.playNoiseBurst(0.18, 0.5, 1800);
+  }
+
+  public playPotShatter(): void {
+    if (this.isMuted) return;
+    this.playDropkick();
+    this.playNoiseBurst(0.25, 0.8, 4800);
+  }
+
   private playNoiseBurst(duration: number, volume: number, filterFreq: number): void {
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
@@ -194,96 +348,4 @@ export class SoundEngine {
 
     noise.start(t);
   }
-
-  // --- 7. Bengali Voice Quips (SpeechSynthesis API with Cartoon Pitch) ---
-  public speakBengaliVoice(text: string): void {
-    if (this.isMuted) return;
-
-    // Cartoon gibberish synth blip fallback
-    this.playCartoonBabble();
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop any pending speech
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.25; // Energetic cartoon pace
-      utterance.pitch = 1.35; // Comical animated cartoon pitch
-
-      // Try finding Bengali voice
-      const voices = window.speechSynthesis.getVoices();
-      const bengaliVoice = voices.find(
-        (v) => v.lang.startsWith('bn') || v.lang.includes('Bengali') || v.name.includes('Bangla')
-      );
-      if (bengaliVoice) {
-        utterance.voice = bengaliVoice;
-      }
-
-      window.speechSynthesis.speak(utterance);
-    }
-  }
-
-  // --- 8. Weapon Sound FX: Chappal, Broom, Sweet Pot ---
-  public playChappal(): void {
-    if (this.isMuted) return;
-    this.initContext();
-    if (!this.ctx) return;
-
-    // Loud rubber snap
-    this.playSlap();
-    this.playNoiseBurst(0.08, 0.9, 3600);
-  }
-
-  public playBroom(): void {
-    if (this.isMuted) return;
-    this.initContext();
-    if (!this.ctx) return;
-
-    // Swoosh brush
-    const t = this.ctx.currentTime;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(400, t);
-    osc.frequency.exponentialRampToValueAtTime(100, t + 0.18);
-    gain.gain.setValueAtTime(0.5, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
-    osc.connect(gain);
-    gain.connect(this.ctx.destination);
-    osc.start(t);
-    osc.stop(t + 0.2);
-
-    this.playNoiseBurst(0.18, 0.5, 1800);
-  }
-
-  public playPotShatter(): void {
-    if (this.isMuted) return;
-    this.initContext();
-    if (!this.ctx) return;
-
-    this.playDropkick();
-    this.playNoiseBurst(0.25, 0.8, 4800);
-  }
-
-  private playCartoonBabble(): void {
-    if (!this.hasInitialized) return;
-    this.initContext();
-    if (!this.ctx) return;
-
-    const t = this.ctx.currentTime;
-    const notes = [320, 480, 640];
-    notes.forEach((freq, idx) => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, t + idx * 0.05);
-      gain.gain.setValueAtTime(0.12, t + idx * 0.05);
-      gain.gain.exponentialRampToValueAtTime(0.01, t + idx * 0.05 + 0.04);
-
-      osc.connect(gain);
-      gain.connect(this.ctx!.destination);
-      osc.start(t + idx * 0.05);
-      osc.stop(t + idx * 0.05 + 0.05);
-    });
-  }
 }
-

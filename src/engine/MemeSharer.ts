@@ -72,3 +72,4 @@ export class MemeSharer {
     }, 'image/png');
   }
 }
+

@@ -7,10 +7,12 @@ export interface CharacterDef {
   name: string;
   bengaliName: string;
   category: 'corporate' | 'family' | 'street';
+  gender: 'male' | 'female';
   roleSubtitle: string;
   shirtColor: number;
   pantsColor: number;
   skinColor: number;
+  hairColor?: number;
   props: string[];
   defaultDialogue: string;
   hitDialogues: string[];
@@ -23,10 +25,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Credit-Stealer Colleague',
     bengaliName: 'কৃতিত্ব চোর সহকর্মী',
     category: 'corporate',
+    gender: 'male',
     roleSubtitle: 'আপনার কোড চুরি করে নিজের নামে প্রেজেন্টেশন দেয়',
     shirtColor: 0x38bdf8, // Light corporate blue
     pantsColor: 0xd4d4d8, // Beige khaki
     skinColor: 0xfbd2b8,
+    hairColor: 0x1e293b,
     props: ['coffee_mug'],
     defaultDialogue: 'ভাই আপনার ফিচারটা সুন্দর ছিল, আমি বসকে দেখিয়ে দিয়েছি!',
     hitDialogues: [
@@ -41,10 +45,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Weekend-Ruining Manager',
     bengaliName: 'শুক্রবার রাতের ম্যানেজার',
     category: 'corporate',
+    gender: 'male',
     roleSubtitle: 'শুক্রবার রাত ১১টায় "জাস্ট ৫ মিনিটের" মিটিং ডাকে',
     shirtColor: 0xf43f5e, // Urgent warning rose
     pantsColor: 0x1e293b,
     skinColor: 0xfad6bf,
+    hairColor: 0x334155,
     props: ['laptop'],
     defaultDialogue: 'হাই ভাই! শুক্রবার রাতে জাস্ট ৫ মিনিটের একটা কুইক কল!',
     hitDialogues: [
@@ -59,10 +65,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Bonus-Denying Boss / CEO',
     bengaliName: 'বোনাস আটকানো সিইও',
     category: 'corporate',
+    gender: 'male',
     roleSubtitle: 'কোম্পানির "খারাপ অর্থনৈতিক অবস্থা" বলে ইনক্রিমেন্ট আটকায়',
     shirtColor: 0x0f172a, // Executive charcoal suit
     pantsColor: 0x0f172a,
     skinColor: 0xfad0b5,
+    hairColor: 0x64748b, // Grey-tinged corporate hair
     props: ['swivel_chair', 'tie'],
     defaultDialogue: 'এ বছর কোম্পানির অবস্থা ভালো না, সবাইকে স্যাক্রিফাইস করতে হবে!',
     hitDialogues: [
@@ -78,10 +86,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Forged-Deed Uncle',
     bengaliName: 'জাল দলিলবাজ চাচা',
     category: 'family',
+    gender: 'male',
     roleSubtitle: 'দাদা মরার পর জাল স্ট্যাম্প পেপার বানিয়ে জমি দখলকারী',
     shirtColor: 0xffffff, // White panjabi
     pantsColor: 0xffffff,
     skinColor: 0xe8b898,
+    hairColor: 0x94a3b8, // White-grey uncle hair
     props: ['deed_papers'],
     defaultDialogue: 'দলিল তো আমার নামে! বাপ-দাদার সম্পত্তি আমি ছাড়া কে পাবে?',
     hitDialogues: [
@@ -96,10 +106,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Gossip Neighbor',
     bengaliName: 'কুটনা প্রতিবেশী আন্টি',
     category: 'family',
+    gender: 'female',
     roleSubtitle: 'রেজাল্ট বের হলেই মিষ্টি হাতে বাড়ি আসে খোঁটা দিতে',
     shirtColor: 0xdb2777, // Vibrant pink sari/kurti
     pantsColor: 0x9333ea,
     skinColor: 0xf5d0b5,
+    hairColor: 0x18181b,
     props: ['sweet_box'],
     defaultDialogue: 'শুনলাম তোমার ছেলের রেজাল্ট নাকি ভালো হয় নাই? মিষ্টি খাও!',
     hitDialogues: [
@@ -115,10 +127,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Wrong-Way Auto Driver',
     bengaliName: 'হাইওয়ের উল্টো অটো',
     category: 'street',
+    gender: 'male',
     roleSubtitle: 'হাইওয়েতে উল্টো লেইনে এসে সবার সাথে ঝগড়া বাঁধায়',
     shirtColor: 0x16a34a, // Green lungi / gamcha
     pantsColor: 0x065f46,
     skinColor: 0xd99873,
+    hairColor: 0x09090b,
     props: ['rickshaw_handle'],
     defaultDialogue: 'কী হইছে ওস্তাদ? এই রাস্তায় আমি ডেইলি উল্টা যাই, কার কী সমস্যা?',
     hitDialogues: [
@@ -133,10 +147,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Paati Chadabaaj',
     bengaliName: 'পাতি চাঁদাবাজ',
     category: 'street',
+    gender: 'male',
     roleSubtitle: 'চা দোকানে বসে রাস্তা আটকে চাঁদা দাবি করে',
     shirtColor: 0xca8a04, // Flashy orange-yellow shirt
     pantsColor: 0x18181b,
     skinColor: 0xcaa080,
+    hairColor: 0x1c1917,
     props: ['metal_chain'],
     defaultDialogue: 'এই এলাকায় ব্যবসা করতে হলে ভাইদের খরচ দিতে হবে, বুঝলি?',
     hitDialogues: [
@@ -151,10 +167,12 @@ export const CHARACTER_CATALOG: CharacterDef[] = [
     name: 'Syndicate Hoarder',
     bengaliName: 'সিন্ডিকেট মজুতদার',
     category: 'street',
+    gender: 'male',
     roleSubtitle: 'পেঁয়াজ ও ডিম গুদামে লুকিয়ে রেখে বাজারে হাহাকার ফেলে দেয়',
     shirtColor: 0x854d0e, // Brown waistcoat / kurta
     pantsColor: 0x3f3f46,
     skinColor: 0xdec0aa,
+    hairColor: 0x475569,
     props: ['onion_sack'],
     defaultDialogue: 'বাজারে মালামাল শর্ট, দাম তো একটু বাড়বেই! আমরা কী করুম?',
     hitDialogues: [
@@ -186,6 +204,8 @@ export class CharacterFactory {
       shirtColor: def.shirtColor,
       pantsColor: def.pantsColor,
       skinColor: def.skinColor,
+      hairColor: def.hairColor,
+      gender: def.gender,
     });
 
     // Attach Character Props

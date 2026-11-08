@@ -9,17 +9,23 @@ import { SoundEngine } from './engine/SoundEngine';
 import { FaceSwap } from './engine/FaceSwap';
 import { WeaponArsenal, WeaponType } from './engine/WeaponArsenal';
 import { MemeSharer } from './engine/MemeSharer';
+import { RagdollDragEngine } from './engine/RagdollDragEngine';
+import { DizzyEffect } from './engine/DizzyEffect';
+import { TrafficSystem, LiveCrimeEvent } from './engine/TrafficSystem';
 
 export class GameApp {
   public sceneManager: SceneManager;
   public physicsWorld: PhysicsWorld;
   public environment: Environment;
+  public trafficSystem: TrafficSystem;
   public characterFactory: CharacterFactory;
   public propsDebrisEngine: PropsDebrisEngine;
   public soundEngine: SoundEngine;
   public faceSwap: FaceSwap;
   public weaponArsenal: WeaponArsenal;
   public memeSharer: MemeSharer;
+  public dragEngine: RagdollDragEngine;
+  public dizzyEffect: DizzyEffect;
   public ragdoll: Ragdoll;
   public combatEngine: CombatEngine;
   public currentCharacter: CharacterDef = CHARACTER_CATALOG[0];
@@ -33,30 +39,96 @@ export class GameApp {
     this.sceneManager = new SceneManager(canvas);
     this.physicsWorld = new PhysicsWorld();
     this.environment = new Environment(this.sceneManager.scene, this.physicsWorld.world);
+    this.trafficSystem = new TrafficSystem(this.sceneManager.scene);
     this.characterFactory = new CharacterFactory(this.sceneManager.scene, this.physicsWorld.world);
     this.propsDebrisEngine = new PropsDebrisEngine(this.sceneManager.scene, this.physicsWorld.world);
     this.soundEngine = new SoundEngine();
     this.weaponArsenal = new WeaponArsenal(this.sceneManager, this.physicsWorld.world);
     this.memeSharer = new MemeSharer(canvas);
+    this.dizzyEffect = new DizzyEffect(this.sceneManager.scene);
 
     // Initial character
     this.ragdoll = this.characterFactory.createCharacter(this.currentCharacter);
     this.combatEngine = new CombatEngine(this.sceneManager);
     this.combatEngine.setRagdoll(this.ragdoll);
+    this.dizzyEffect.setRagdoll(this.ragdoll);
+
+    // Interactive Drag & Fling Engine
+    this.dragEngine = new RagdollDragEngine(this.sceneManager);
+    this.dragEngine.setRagdoll(this.ragdoll);
+    this.dragEngine.setOnTossed((speed) => {
+      this.soundEngine.playWhistleLaunch();
+      this.sceneManager.triggerCameraShake(Math.min(speed * 0.04, 0.7));
+      this.dizzyEffect.setVisible(true);
+      const tossLines = ['উড়া ধুরা!', 'আমারে কই নিয়া যান?!', 'ড্রেনে ফালাইয়েন না!'];
+      const text = tossLines[Math.floor(Math.random() * tossLines.length)];
+      this.showSpeech(text);
+      this.soundEngine.speakBengaliVoice(text, this.currentCharacter.gender);
+    });
 
     // Face Swap Engine
     this.faceSwap = new FaceSwap();
     this.faceSwap.setOnFaceApplied((texture) => {
       this.ragdoll.setFaceTexture(texture);
-      this.showSpeech('হায় হায়! আমার মুখে কার ছবি বসাইলেন?!');
-      this.soundEngine.speakBengaliVoice('হায় হায়! আমার মুখে কার ছবি বসাইলেন?!');
+      const reactText = 'হায় হায়! আমার মুখে কার ছবি বসাইলেন?!';
+      this.showSpeech(reactText);
+      this.soundEngine.speakBengaliVoice(reactText, this.currentCharacter.gender);
     });
+
+    // Traffic System Audio & Crime Alerts
+    this.trafficSystem.onHonkTriggered = (type) => {
+      if (type === 'bus') {
+        this.soundEngine.playBusAirHorn();
+      } else {
+        this.soundEngine.playRickshawBell();
+      }
+    };
+
+    this.trafficSystem.onCrimeTriggered = (crime) => {
+      this.displayCrimeAlert(crime);
+    };
 
     this.initUI();
     this.showSpeech(this.currentCharacter.defaultDialogue);
 
     this.animate = this.animate.bind(this);
     requestAnimationFrame(this.animate);
+  }
+
+  private displayCrimeAlert(crime: LiveCrimeEvent): void {
+    const banner = document.getElementById('live-crime-banner');
+    const title = document.getElementById('crime-title');
+    const desc = document.getElementById('crime-desc');
+    if (!banner || !title || !desc) return;
+
+    title.innerText = crime.title;
+    desc.innerText = `${crime.crimeDescription} (${crime.locationName})`;
+    banner.style.display = 'flex';
+
+    banner.onclick = () => {
+      const match = CHARACTER_CATALOG.find((c) => c.id === crime.characterId);
+      if (match) {
+        this.switchCharacter(match);
+        this.sceneManager.triggerCameraShake(0.4);
+        banner.style.display = 'none';
+
+        // Update active UI tab
+        document.querySelectorAll('#character-scroller .char-card').forEach((c) => {
+          if (c.getAttribute('data-id') === match.id) {
+            c.classList.add('active');
+          } else {
+            c.classList.remove('active');
+          }
+        });
+      }
+    };
+
+    // Auto dismiss after 9 seconds if not clicked
+    setTimeout(() => {
+      if (banner.style.display === 'flex') {
+        banner.style.display = 'none';
+      }
+    }, 9000);
   }
 
   private initUI(): void {
@@ -81,6 +153,7 @@ export class GameApp {
 
     resetBtn?.addEventListener('click', () => {
       this.ragdoll.resetToStanding(0, 0);
+      this.dizzyEffect.setVisible(false);
       this.sceneManager.triggerCameraShake(0.1);
       this.showSpeech(this.currentCharacter.defaultDialogue);
     });
@@ -120,9 +193,10 @@ export class GameApp {
       CHARACTER_CATALOG.forEach((char) => {
         const card = document.createElement('div');
         card.className = `char-card ${char.id === this.currentCharacter.id ? 'active' : ''}`;
+        card.setAttribute('data-id', char.id);
         
         let icon = '👔';
-        if (char.category === 'family') icon = '📜';
+        if (char.category === 'family') icon = char.gender === 'female' ? '🧕' : '📜';
         if (char.category === 'street') icon = '🛺';
         if (char.id === 'manager') icon = '💻';
         if (char.id === 'boss') icon = '💼';
@@ -145,13 +219,18 @@ export class GameApp {
     this.ragdoll.destroy();
     this.ragdoll = this.characterFactory.createCharacter(char);
     this.combatEngine.setRagdoll(this.ragdoll);
+    this.dragEngine.setRagdoll(this.ragdoll);
+    this.dizzyEffect.setRagdoll(this.ragdoll);
+    this.dizzyEffect.setVisible(false);
     this.faceSwap.applyToRagdoll(this.ragdoll);
     this.showSpeech(char.defaultDialogue);
+    this.soundEngine.speakBengaliVoice(char.defaultDialogue, char.gender);
     this.sceneManager.triggerCameraShake(0.2);
   }
 
   private handleHit(type: 'slap' | 'kick' | 'super'): void {
     const headPos = this.ragdoll.parts['head'].mesh.position;
+    this.dizzyEffect.setVisible(true);
 
     // Launch active weapon projectile
     if (this.weaponArsenal.activeWeapon !== 'hand') {
@@ -194,11 +273,11 @@ export class GameApp {
       this.soundEngine.playSuperFinisher();
     }
 
-    // Pick random Bengali hit reaction dialogue and speak
+    // Pick random Bengali hit reaction dialogue and speak with realistic gender tone
     const lines = this.currentCharacter.hitDialogues;
     const randomLine = lines[Math.floor(Math.random() * lines.length)];
     this.showSpeech(randomLine);
-    this.soundEngine.speakBengaliVoice(randomLine);
+    this.soundEngine.speakBengaliVoice(randomLine, this.currentCharacter.gender);
   }
 
   private showSpeech(text: string): void {
@@ -242,6 +321,8 @@ export class GameApp {
       this.characterFactory.updateChairPhysics();
       this.propsDebrisEngine.update(deltaTime);
       this.weaponArsenal.update(deltaTime);
+      this.trafficSystem.update(deltaTime);
+      this.dizzyEffect.update(deltaTime);
     }
 
     this.combatEngine.update(deltaTime);

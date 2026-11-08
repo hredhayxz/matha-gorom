@@ -388,6 +388,42 @@
       </div>
     </div>
 
+    <!-- Live Street Crime Notification Banner -->
+    <div id="live-crime-banner" class="interactive" style="
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 10px auto;
+      max-width: 600px;
+      width: 95%;
+      background: linear-gradient(135deg, rgba(185, 28, 28, 0.95), rgba(153, 27, 27, 0.95));
+      border: 2px solid #fef08a;
+      border-radius: 9999px;
+      padding: 8px 18px;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(220, 38, 38, 0.6);
+      cursor: pointer;
+      animation: bannerPulse 1s infinite alternate;
+    ">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.3rem;">🚨</span>
+        <div>
+          <div id="crime-title" style="font-weight: 900; font-size: 0.95rem; color: #fde047;"></div>
+          <div id="crime-desc" style="font-size: 0.75rem; color: #fecaca;"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="padding: 4px 12px; font-size: 0.8rem; background: #fbbf24; color: #111; font-weight: 800; border: none; white-space: nowrap;">
+        ধোলাই দিন! ⚡
+      </button>
+    </div>
+    <style>
+      @keyframes bannerPulse {
+        0% { transform: scale(1); box-shadow: 0 0 10px rgba(239, 68, 68, 0.6); }
+        100% { transform: scale(1.02); box-shadow: 0 0 24px rgba(239, 68, 68, 0.9); }
+      }
+    </style>
+
     <!-- Speech Balloon / Reaction Text -->
     <div id="speech-bubble-container" style="position: absolute; top: 18%; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 20;"></div>
 
