@@ -1,9 +1,11 @@
 import { SceneManager } from './engine/SceneManager';
 import { PhysicsWorld } from './engine/PhysicsWorld';
+import { Environment } from './engine/Environment';
 
-class GameApp {
-  private sceneManager: SceneManager;
-  private physicsWorld: PhysicsWorld;
+export class GameApp {
+  public sceneManager: SceneManager;
+  public physicsWorld: PhysicsWorld;
+  public environment: Environment;
   private lastTime: number = performance.now();
 
   constructor() {
@@ -12,6 +14,7 @@ class GameApp {
 
     this.sceneManager = new SceneManager(canvas);
     this.physicsWorld = new PhysicsWorld();
+    this.environment = new Environment(this.sceneManager.scene, this.physicsWorld.world);
 
     this.initUI();
     this.animate = this.animate.bind(this);

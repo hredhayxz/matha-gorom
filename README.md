@@ -26,11 +26,14 @@ A viral, production-grade, ultra-snappy 3D web comedy action ragdoll game set on
   - Three.js SceneManager with Dhaka tropical lighting & camera shake system
   - Cannon-es PhysicsWorld setup with cartoon bounce materials
   - Cloudflare Pages live production deployment connected
-- [ ] **Step 2: Procedural Dhaka Street Scene**
-  - Mayor Hanif Flyover pillars & ramps
-  - Asphalt road, yellow-black curb dividers, open roadside drains (ড্রেন)
-  - Dangling electric wire nests & Bengali signboards ("বিরিয়ানি হাউস", "টং দোকান")
-  - Dhaka local bus ("মুড়ির টিন") & battery auto-rickshaws
+- [x] **Step 2: Procedural Dhaka Street Scene**
+  - Mayor Hanif Flyover concrete pillars, bridge decks, and guard rails
+  - Asphalt road, yellow dashed divider, yellow-black painted curb dividers
+  - Open roadside concrete drain (ড্রেন) with hazardous gaps & dark reflective water
+  - Dangling electric wire nests & Dhaka street light poles
+  - Bengali signboards: "হাজী বিরিয়ানি হাউস", "মামার স্পেশাল টং দোকান", "ঢাকা প্রেস ক্লাব", "নো পার্কিং"
+  - Dhaka municipal waste bins, wooden tea stall bench, aluminum kettle with spout & tea cups
+  - Low-poly "মুড়ির টিন" Dhaka local bus & battery auto-rickshaw with physics collision
 - [ ] **Step 3: Procedural Character Rig & Cannon-es Ragdoll Combat Engine**
 - [ ] **Step 4: Corporate Suite Characters & Slapstick Reactions**
 - [ ] **Step 5: Family, Social & Street Syndicate Characters**
