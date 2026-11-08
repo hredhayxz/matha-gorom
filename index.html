@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#e11d48" />
+  <meta name="description" content="MathaGorom 3D (মাথা গরম) - Viral 3D Bengali Comedy Action Ragdoll Game" />
+  <title>MathaGorom 3D | মাথা গরম ৩ডি</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>" />
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #09090b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #ffffff;
+      touch-action: none;
+    }
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+    #ui-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 10;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+    }
+    .interactive {
+      pointer-events: auto;
+    }
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      padding: 8px 16px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-title {
+      font-weight: 900;
+      font-size: 1.2rem;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .rage-container {
+      flex: 1;
+      max-width: 280px;
+      margin: 0 12px;
+    }
+    .rage-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fbbf24;
+    }
+    .rage-bar-outer {
+      width: 100%;
+      height: 14px;
+      background: #27272a;
+      border-radius: 7px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+    }
+    .rage-bar-inner {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #ef4444, #dc2626);
+      transition: width 0.15s ease-out;
+      box-shadow: 0 0 12px #ef4444;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: scale(0.96);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      border: none;
+      color: #fff;
+    }
+    /* Bottom Controls */
+    .bottom-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+    .character-scroller {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      max-width: 100%;
+      padding: 6px 12px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      scrollbar-width: none;
+    }
+    .character-scroller::-webkit-scrollbar {
+      display: none;
+    }
+    .char-card {
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .char-card.active {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      border-color: #fef08a;
+      box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+      transform: scale(1.05);
+    }
+    .action-panel {
+      display: flex;
+      gap: 12px;
+    }
+    .action-btn {
+      padding: 12px 28px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      border-radius: 9999px;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.1s ease;
+    }
+    .action-btn-slap {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #111;
+    }
+    .action-btn-kick {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: #fff;
+    }
+    .action-btn-super {
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      color: #fff;
+      display: none;
+      animation: pulse 1s infinite alternate;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 12px #ec4899; }
+      100% { transform: scale(1.08); box-shadow: 0 0 28px #f43f5e; }
+    }
+    /* Floating Hit Text & Stars */
+    .hit-bubble {
+      position: absolute;
+      pointer-events: none;
+      font-weight: 900;
+      font-size: 2rem;
+      color: #fde047;
+      text-shadow: 2px 2px 0 #b91c1c, -2px -2px 0 #b91c1c, 2px -2px 0 #b91c1c, -2px 2px 0 #b91c1c;
+      animation: floatUp 0.7s forwards ease-out;
+      transform-origin: center;
+      z-index: 50;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translate(-50%, -50%) scale(0.6) rotate(-10deg); }
+      50% { transform: translate(-50%, -80px) scale(1.3) rotate(8deg); }
+      100% { opacity: 0; transform: translate(-50%, -120px) scale(1.1) rotate(0deg); }
+    }
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-card {
+      background: #18181b;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 440px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fbbf24;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: #a1a1aa;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .crop-canvas-wrapper {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      margin: 0 auto;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px dashed #ef4444;
+      background: #27272a;
+    }
+    #cropCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <div id="ui-overlay">
+    <!-- Top Bar -->
+    <div class="top-bar interactive">
+      <div class="brand">
+        <span style="font-size: 1.5rem;">🔥</span>
+        <div>
+          <div class="brand-title">মাথা গরম ৩ডি</div>
+          <div style="font-size: 0.65rem; color: #a1a1aa;">MathaGorom 3D v1.0</div>
+        </div>
+      </div>
+
+      <div class="rage-container">
+        <div class="rage-label-row">
+          <span>মাথা গরম মিটার</span>
+          <span id="rage-percent">0%</span>
+        </div>
+        <div class="rage-bar-outer">
+          <div class="rage-bar-inner" id="rage-bar"></div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn" id="face-btn" title="কাস্টম মুখ বসান">
+          👤 <span class="hide-mobile">মুখ বসান</span>
+        </button>
+        <button class="btn" id="sound-btn" title="সাউন্ড অন/অফ">
+          🔊
+        </button>
+        <button class="btn btn-primary" id="reset-btn" title="রিসেট">
+          🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- Speech Balloon / Reaction Text -->
+    <div id="speech-bubble-container" style="position: absolute; top: 18%; left: 50%; transform: translateX(-50%); pointer-events: none; z-index: 20;"></div>
+
+    <!-- Bottom Controls & Selector -->
+    <div class="bottom-bar interactive">
+      <div class="character-scroller" id="character-scroller">
+        <!-- Will be populated by TS -->
+      </div>
+
+      <div class="action-panel">
+        <button class="action-btn action-btn-slap" id="slap-btn">
+          👋 কষে চড় (SLAP)
+        </button>
+        <button class="action-btn action-btn-kick" id="kick-btn">
+          💥 ড্রপ কিক (KICK)
+        </button>
+        <button class="action-btn action-btn-super" id="super-btn">
+          ⚡ মহা ধুলাই (SUPER)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Face Swap Modal -->
+  <div class="modal-overlay" id="face-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">🎭 কাস্টম মুখ বসান (Face Swap)</div>
+        <button class="close-btn" id="close-modal-btn">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: #d4d4d8;">
+        আপনার বিরক্তির পাত্রের ছবি আপলোড করুন অথবা ক্যামেরা অন করুন। ছবিটি সম্পূর্ণ ক্লায়েন্ট সাইডে প্রসেস হবে—কোনো সার্ভারে যাবে না!
+      </p>
+      
+      <div class="crop-canvas-wrapper">
+        <canvas id="cropCanvas" width="256" height="256"></canvas>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <label class="btn" style="cursor: pointer;">
+          📁 ফাইল বাছুন
+          <input type="file" id="face-file-input" accept="image/*" style="display: none;" />
+        </label>
+        <button class="btn" id="webcam-btn">📷 ক্যামেরা</button>
+        <button class="btn" id="clear-face-btn">❌ বাদ দিন</button>
+      </div>
+
+      <button class="btn btn-primary" id="apply-face-btn" style="justify-content: center; padding: 10px; font-size: 1rem;">
+        ✅ মুখে সেট করুন
+      </button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

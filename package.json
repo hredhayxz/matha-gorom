@@ -1,0 +1,23 @@
+{
+  "name": "matha-gorom",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MathaGorom 3D (মাথা গরম) - Viral 3D Web Comedy Action Game",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name matha-gorom"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.180.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0",
+    "wrangler": "^4.158.0"
+  }
+}
