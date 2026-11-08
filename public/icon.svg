@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+    <linearGradient id="fireGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="50%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#fde047"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <circle cx="256" cy="256" r="230" fill="none" stroke="#ef4444" stroke-width="12" stroke-dasharray="24 16"/>
+
+  <!-- Flame Shape -->
+  <path d="M256 60 C230 130 140 180 140 290 C140 380 195 440 256 440 C317 440 372 380 372 290 C372 220 310 160 290 120 C280 170 250 190 240 220 C230 170 256 110 256 60 Z" fill="url(#fireGrad)"/>
+
+  <!-- Bengali Typography "মাথা গরম" -->
+  <text x="256" y="380" font-family="system-ui, sans-serif" font-weight="900" font-size="52" fill="#ffffff" text-anchor="middle" stroke="#000000" stroke-width="4">মাথা গরম</text>
+  <text x="256" y="420" font-family="system-ui, sans-serif" font-weight="900" font-size="28" fill="#fde047" text-anchor="middle">3D ACTION</text>
+</svg>

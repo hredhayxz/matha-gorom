@@ -1,0 +1,19 @@
+{
+  "name": "মাথা গরম ৩ডি - MathaGorom 3D",
+  "short_name": "মাথা গরম",
+  "description": "Dhaka street comedy 3D action ragdoll slap game",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#09090b",
+  "theme_color": "#ef4444",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

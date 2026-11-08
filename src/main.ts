@@ -209,4 +209,13 @@ export class GameApp {
 
 window.addEventListener('DOMContentLoaded', () => {
   new GameApp();
+
+  // Register PWA Service Worker
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('./sw.js').then((reg) => {
+      console.log('MathaGorom PWA Service Worker active:', reg.scope);
+    }).catch((err) => {
+      console.warn('PWA registration failed:', err);
+    });
+  }
 });
