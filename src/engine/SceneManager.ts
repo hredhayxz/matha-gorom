@@ -39,6 +39,7 @@ export class SceneManager {
     this.renderer.toneMappingExposure = 1.1;
 
     this.setupLighting();
+    this.onResize();
     window.addEventListener('resize', this.onResize.bind(this));
   }
 
@@ -95,7 +96,28 @@ export class SceneManager {
   private onResize(): void {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    this.camera.aspect = width / height;
+    const aspect = width / height;
+
+    this.camera.aspect = aspect;
+
+    // Responsive FOV & camera distance: Mobile portrait needs slightly wider FOV or pulled back camera
+    if (aspect < 1.0) {
+      // Portrait mobile (e.g. phone screen)
+      this.camera.fov = 55;
+      this.baseCameraPos.set(0, 2.3, 7.8);
+      this.cameraLookAt.set(0, 1.2, 0);
+    } else if (aspect < 1.4) {
+      // Tablet / square screen
+      this.camera.fov = 48;
+      this.baseCameraPos.set(0, 2.4, 6.8);
+      this.cameraLookAt.set(0, 1.25, 0);
+    } else {
+      // Desktop / large widescreen monitor
+      this.camera.fov = 42;
+      this.baseCameraPos.set(0, 2.5, 6.0);
+      this.cameraLookAt.set(0, 1.3, 0);
+    }
+
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   }

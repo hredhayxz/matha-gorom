@@ -34,7 +34,15 @@ A viral, production-grade, ultra-snappy 3D web comedy action ragdoll game set on
   - Bengali signboards: "হাজী বিরিয়ানি হাউস", "মামার স্পেশাল টং দোকান", "ঢাকা প্রেস ক্লাব", "নো পার্কিং"
   - Dhaka municipal waste bins, wooden tea stall bench, aluminum kettle with spout & tea cups
   - Low-poly "মুড়ির টিন" Dhaka local bus & battery auto-rickshaw with physics collision
-- [ ] **Step 3: Procedural Character Rig & Cannon-es Ragdoll Combat Engine**
+- [x] **Step 3: Procedural Character Rig & Cannon-es Ragdoll Combat Engine**
+  - Snappy multi-part rigged humanoid ragdoll (Torso, Head, Limbs) with Cannon-es point-to-point constraints
+  - Direct touch and click raycasting hit detection
+  - 60ms 1-frame Hit-Stop freeze frame effect for impactful fighting-game tactile punch
+  - Screen shake & 3D comic star burst particle physics
+  - Floating Bengali comic hit bubbles ("ঠাস!", "ধমাশ!", "ডিসুম!", "পটাশ!")
+  - Interactive "মাথা গরম মিটার" (Rage Meter) filling to 100% to unleash cinematic "মহা ধুলাই" Super Finisher
+  - Mobile, tablet, and ultra-wide monitor responsive viewport styling (`height: 100dvh`, adaptive FOV)
+- [ ] **Step 4: Corporate Suite Characters & Slapstick Reactions**
 - [ ] **Step 4: Corporate Suite Characters & Slapstick Reactions**
 - [ ] **Step 5: Family, Social & Street Syndicate Characters**
 - [ ] **Step 6: Web Audio Procedural Sounds & Bengali Voice Quips**
