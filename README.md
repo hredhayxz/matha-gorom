@@ -42,9 +42,16 @@ A viral, production-grade, ultra-snappy 3D web comedy action ragdoll game set on
   - Floating Bengali comic hit bubbles ("ঠাস!", "ধমাশ!", "ডিসুম!", "পটাশ!")
   - Interactive "মাথা গরম মিটার" (Rage Meter) filling to 100% to unleash cinematic "মহা ধুলাই" Super Finisher
   - Mobile, tablet, and ultra-wide monitor responsive viewport styling (`height: 100dvh`, adaptive FOV)
-- [ ] **Step 4: Corporate Suite Characters & Slapstick Reactions**
-- [ ] **Step 4: Corporate Suite Characters & Slapstick Reactions**
-- [ ] **Step 5: Family, Social & Street Syndicate Characters**
+- [x] **Step 4: Corporate Suite Characters & Slapstick Reactions**
+  - "কাজের কৃতিত্ব চুরি করা সহকর্মী (Credit-Stealer Colleague)": Holds coffee mug, hit spawns 15 shattered keyboard keys flying in 3D physics.
+  - "শুক্রবার রাতের প্রজেক্ট ম্যানেজার (Weekend-Ruining Manager)": Emergency laptop waving, knocked toward trash bins.
+  - "বোনাস আটকানো বস / সিইও (Bonus-Denying Boss)": Sits in executive swivel chair; on hit, chair spins violently (45 rad/s) and launches into roadside drain.
+- [x] **Step 5: Family, Social & Street Syndicate Characters**
+  - "জাল দলিলবাজ চাচা": Forged stamp papers, ancestral land claims, launched headfirst.
+  - "কুটনা প্রতিবেশী": Gossips about exam results, sweet box explodes into flying rasgullas.
+  - "হাইওয়ের উল্টো অটো": Highway wrong-way auto driver with lungi and gamcha.
+  - "পাতি চাঁদাবাজ": Extortionist knocked into dumpster.
+  - "সিন্ডিকেট মজুতদার": Hoards onions & eggs, buried under flying onion sacks.
 - [ ] **Step 6: Web Audio Procedural Sounds & Bengali Voice Quips**
 - [ ] **Step 7: Client-Side Face-Swap Tool & IndexedDB**
 - [ ] **Step 8: PWA Manifest & Service Worker Offline Cache**
