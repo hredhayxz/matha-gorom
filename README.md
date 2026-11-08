@@ -59,5 +59,9 @@ A viral, production-grade, ultra-snappy 3D web comedy action ragdoll game set on
   - Resonant metallic dustbin clatters and keyboard snap clatter
   - Cinematic Super Finisher ascending sawtooth riser & explosion
   - Web SpeechSynthesis API Bengali voice quips with comical cartoon pitch & cartoon audio blips
-- [ ] **Step 7: Client-Side Face-Swap Tool & IndexedDB**
+- [x] **Step 7: Client-Side Face-Swap Tool & IndexedDB**
+  - Client-side circular face cropping tool with webcam & image file picker
+  - Dynamic Three.js `CanvasTexture` mapped in real-time onto character head mesh
+  - 100% offline local persistence via browser `IndexedDB` (`MathaGoromDB`) with zero server privacy risk
+  - Persistent custom face across character roster switching
 - [ ] **Step 8: PWA Manifest & Service Worker Offline Cache**

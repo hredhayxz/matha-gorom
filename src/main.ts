@@ -6,6 +6,7 @@ import { CombatEngine } from './engine/CombatEngine';
 import { CharacterFactory, CHARACTER_CATALOG, CharacterDef } from './engine/CharacterFactory';
 import { PropsDebrisEngine } from './engine/PropsDebrisEngine';
 import { SoundEngine } from './engine/SoundEngine';
+import { FaceSwap } from './engine/FaceSwap';
 
 export class GameApp {
   public sceneManager: SceneManager;
@@ -14,6 +15,7 @@ export class GameApp {
   public characterFactory: CharacterFactory;
   public propsDebrisEngine: PropsDebrisEngine;
   public soundEngine: SoundEngine;
+  public faceSwap: FaceSwap;
   public ragdoll: Ragdoll;
   public combatEngine: CombatEngine;
   public currentCharacter: CharacterDef = CHARACTER_CATALOG[0];
@@ -34,6 +36,14 @@ export class GameApp {
     this.ragdoll = this.characterFactory.createCharacter(this.currentCharacter);
     this.combatEngine = new CombatEngine(this.sceneManager);
     this.combatEngine.setRagdoll(this.ragdoll);
+
+    // Face Swap Engine
+    this.faceSwap = new FaceSwap();
+    this.faceSwap.setOnFaceApplied((texture) => {
+      this.ragdoll.setFaceTexture(texture);
+      this.showSpeech('হায় হায়! আমার মুখে কার ছবি বসাইলেন?!');
+      this.soundEngine.speakBengaliVoice('হায় হায়! আমার মুখে কার ছবি বসাইলেন?!');
+    });
 
     this.initUI();
     this.showSpeech(this.currentCharacter.defaultDialogue);
@@ -106,6 +116,7 @@ export class GameApp {
     this.ragdoll.destroy();
     this.ragdoll = this.characterFactory.createCharacter(char);
     this.combatEngine.setRagdoll(this.ragdoll);
+    this.faceSwap.applyToRagdoll(this.ragdoll);
     this.showSpeech(char.defaultDialogue);
     this.sceneManager.triggerCameraShake(0.2);
   }
