@@ -373,6 +373,9 @@
       </div>
 
       <div class="btn-group">
+        <button class="btn" id="dialogue-btn" title="ডায়লগ সাউন্ডবোর্ড">
+          🎙️ <span class="hide-mobile">ডায়লগ</span>
+        </button>
         <button class="btn" id="share-meme-btn" title="মেমে সেভ ও শেয়ার করুন">
           📸 <span class="hide-mobile">মেমে শেয়ার</span>
         </button>
@@ -387,6 +390,24 @@
         </button>
       </div>
     </div>
+
+    <!-- Combo Hit Badge -->
+    <div id="combo-badge" style="
+      display: none;
+      align-items: center;
+      gap: 6px;
+      margin: 6px auto;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.92rem;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5);
+      border: 1px solid #fef08a;
+      pointer-events: none;
+      z-index: 25;
+    "></div>
 
     <!-- Live Street Crime Notification Banner -->
     <div id="live-crime-banner" class="interactive" style="
@@ -452,6 +473,20 @@
           ⚡ মহা ধুলাই (SUPER)
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Dialogue Soundboard Modal -->
+  <div class="modal-overlay" id="dialogue-modal">
+    <div class="modal-card" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-title">🎙️ ভাইরাল বাংলা ডায়লগ সাউন্ডবোর্ড</div>
+        <button class="close-btn" id="close-dialogue-btn">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: #d4d4d8;">
+        যেকোনো ডায়লগে ক্লিক করুন—ক্যারেক্টার সেই সংলাপে বাস্তব গলায় কথা বলে উঠবে!
+      </p>
+      <div id="soundboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-height: 55vh; overflow-y: auto; padding-right: 4px;"></div>
     </div>
   </div>
 

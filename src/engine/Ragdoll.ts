@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
+import { CharacterTextures } from './CharacterTextures';
 
 export interface RagdollPart {
   mesh: THREE.Mesh | THREE.Group;
@@ -18,6 +19,7 @@ export class Ragdoll {
   public mouthMesh!: THREE.Mesh;
   public isRagdoll: boolean = false;
   public gender: 'male' | 'female' = 'male';
+  public characterId: string = 'colleague';
 
   private scene: THREE.Scene;
   private physicsWorld: CANNON.World;
@@ -34,6 +36,7 @@ export class Ragdoll {
     scene: THREE.Scene,
     physicsWorld: CANNON.World,
     options?: {
+      characterId?: string;
       shirtColor?: number;
       pantsColor?: number;
       skinColor?: number;
@@ -46,28 +49,45 @@ export class Ragdoll {
     this.group = new THREE.Group();
     this.scene.add(this.group);
 
+    if (options?.characterId) this.characterId = options.characterId;
     if (options?.shirtColor) this.shirtColor = options.shirtColor;
     if (options?.pantsColor) this.pantsColor = options.pantsColor;
     if (options?.skinColor) this.skinColor = options.skinColor;
     if (options?.hairColor) this.hairColor = options.hairColor;
     if (options?.gender) this.gender = options.gender;
 
-    this.buildOrganicCartoonHuman();
+    this.buildFullHumanGraphics();
   }
 
-  // --- Sculpted Organic Cartoon Human Caricature ---
-  private buildOrganicCartoonHuman(): void {
+  // --- Full Human Graphics & Movement (Baper Rasta / Caricature Art Style) ---
+  private buildFullHumanGraphics(): void {
+    const skinHex = '#' + this.skinColor.toString(16).padStart(6, '0');
+    const faceTexture = CharacterTextures.getFaceTexture(this.characterId, skinHex);
+
+    let fabricTexture: THREE.CanvasTexture | null = null;
+    if (this.characterId === 'rickshaw') {
+      fabricTexture = CharacterTextures.getFabricTexture('lungi');
+    } else if (this.characterId === 'neighbor') {
+      fabricTexture = CharacterTextures.getFabricTexture('saree');
+    } else if (this.characterId === 'boss') {
+      fabricTexture = CharacterTextures.getFabricTexture('suit');
+    } else if (this.characterId === 'chacha') {
+      fabricTexture = CharacterTextures.getFabricTexture('panjabi');
+    }
+
     const skinMat = new THREE.MeshStandardMaterial({
       color: this.skinColor,
-      roughness: 0.6,
+      roughness: 0.5,
       metalness: 0.05,
     });
     const clothesMat = new THREE.MeshStandardMaterial({
       color: this.shirtColor,
-      roughness: 0.75,
+      map: fabricTexture || null,
+      roughness: 0.7,
     });
     const pantsMat = new THREE.MeshStandardMaterial({
       color: this.pantsColor,
+      map: (this.characterId === 'rickshaw' ? fabricTexture : null) || null,
       roughness: 0.8,
     });
     const hairMat = new THREE.MeshStandardMaterial({
@@ -75,27 +95,28 @@ export class Ragdoll {
       roughness: 0.9,
     });
 
-    // 1. Torso & Chest (Organic curved torso, tapered waist)
+    // 1. Organic Human Torso (Curved Chest, Collar, Tapered Waist)
     const torsoGroup = new THREE.Group();
-    
-    // Chest / Upper Body
+
+    // Chest
     const chestGeo = new THREE.CylinderGeometry(0.38, 0.32, 0.55, 16);
     const chest = new THREE.Mesh(chestGeo, clothesMat);
     chest.position.set(0, 0.25, 0);
     chest.castShadow = true;
     torsoGroup.add(chest);
 
-    // Collar / Neckline
+    // Collar
     const collarGeo = new THREE.TorusGeometry(0.18, 0.04, 8, 16);
     const collar = new THREE.Mesh(collarGeo, clothesMat);
     collar.position.set(0, 0.52, 0);
     collar.rotation.x = Math.PI / 2;
     torsoGroup.add(collar);
 
-    // Abdomen & Waist
-    const bellyGeo = new THREE.CylinderGeometry(0.32, 0.35, 0.45, 16);
+    // Abdomen / Potbelly for Boss / Uncle
+    const bellyRadius = (this.characterId === 'boss' || this.characterId === 'chacha') ? 0.38 : 0.32;
+    const bellyGeo = new THREE.CylinderGeometry(bellyRadius, 0.34, 0.45, 16);
     const belly = new THREE.Mesh(bellyGeo, clothesMat);
-    belly.position.set(0, -0.2, 0);
+    belly.position.set(0, -0.2, (this.characterId === 'boss' ? 0.06 : 0));
     belly.castShadow = true;
     torsoGroup.add(belly);
 
@@ -114,20 +135,21 @@ export class Ragdoll {
     torsoBody.position.set(0, 1.45, 0);
     this.parts['torso'] = { mesh: torsoGroup, body: torsoBody, initialOffset: new THREE.Vector3(0, 1.45, 0) };
 
-    // 2. Sculpted Expressive Cartoon Head
+    // 2. Full Caricature Head with Painted Face Texture
     this.headMesh = new THREE.Group();
 
-    // Cranium / Head Sphere
-    const craniumGeo = new THREE.SphereGeometry(0.34, 24, 24);
+    // Head Sphere with dynamic Face Texture map
+    const craniumGeo = new THREE.SphereGeometry(0.35, 24, 24);
     this.faceMaterial = new THREE.MeshStandardMaterial({
-      color: this.skinColor,
-      roughness: 0.5,
+      map: faceTexture,
+      roughness: 0.45,
     });
     this.faceMesh = new THREE.Mesh(craniumGeo, this.faceMaterial);
+    this.faceMesh.rotation.y = -Math.PI / 2; // Center face frontwards
     this.faceMesh.castShadow = true;
     this.headMesh.add(this.faceMesh);
 
-    // Cartoon Ears
+    // 3D Sculpted Ears
     const earGeo = new THREE.SphereGeometry(0.08, 12, 12);
     const leftEar = new THREE.Mesh(earGeo, skinMat);
     leftEar.scale.set(0.6, 1.2, 0.8);
@@ -139,66 +161,16 @@ export class Ragdoll {
     rightEar.position.set(0.35, 0, 0);
     this.headMesh.add(rightEar);
 
-    // Cartoon Nose (Rounded Dhakai nose)
-    const noseGeo = new THREE.SphereGeometry(0.07, 12, 12);
+    // 3D Sculpted Nose
+    const noseGeo = new THREE.SphereGeometry(0.06, 12, 12);
     const nose = new THREE.Mesh(noseGeo, skinMat);
     nose.scale.set(0.9, 1.1, 1.3);
-    nose.position.set(0, -0.02, 0.34);
+    nose.position.set(0, -0.02, 0.35);
     this.headMesh.add(nose);
 
-    // Expressive Eyes (Whites + Pupils)
-    const eyeWhiteGeo = new THREE.SphereGeometry(0.08, 16, 16);
-    const eyeWhiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const pupilGeo = new THREE.SphereGeometry(0.045, 12, 12);
-    const pupilMat = new THREE.MeshBasicMaterial({ color: 0x09090b });
-
-    // Left Eye
-    const leftEyeGroup = new THREE.Group();
-    const leftWhite = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
-    leftWhite.scale.set(1.1, 1.2, 0.6);
-    const leftPupil = new THREE.Mesh(pupilGeo, pupilMat);
-    leftPupil.position.set(0, 0, 0.05);
-    leftEyeGroup.add(leftWhite);
-    leftEyeGroup.add(leftPupil);
-    leftEyeGroup.position.set(-0.13, 0.08, 0.31);
-    this.leftEye = leftEyeGroup as unknown as THREE.Mesh;
-    this.headMesh.add(leftEyeGroup);
-
-    // Right Eye
-    const rightEyeGroup = new THREE.Group();
-    const rightWhite = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
-    rightWhite.scale.set(1.1, 1.2, 0.6);
-    const rightPupil = new THREE.Mesh(pupilGeo, pupilMat);
-    rightPupil.position.set(0, 0, 0.05);
-    rightEyeGroup.add(rightWhite);
-    rightEyeGroup.add(rightPupil);
-    rightEyeGroup.position.set(0.13, 0.08, 0.31);
-    this.rightEye = rightEyeGroup as unknown as THREE.Mesh;
-    this.headMesh.add(rightEyeGroup);
-
-    // Eyebrows
-    const browGeo = new THREE.BoxGeometry(0.12, 0.035, 0.03);
-    const leftBrow = new THREE.Mesh(browGeo, hairMat);
-    leftBrow.position.set(-0.13, 0.20, 0.32);
-    leftBrow.rotation.z = -0.15;
-    this.headMesh.add(leftBrow);
-
-    const rightBrow = new THREE.Mesh(browGeo, hairMat);
-    rightBrow.position.set(0.13, 0.20, 0.32);
-    rightBrow.rotation.z = 0.15;
-    this.headMesh.add(rightBrow);
-
-    // Mouth (Dynamic cartoon smirk / scream mouth)
-    const mouthGeo = new THREE.BoxGeometry(0.16, 0.05, 0.04);
-    const mouthMat = new THREE.MeshBasicMaterial({ color: 0x7f1d1d });
-    this.mouthMesh = new THREE.Mesh(mouthGeo, mouthMat);
-    this.mouthMesh.position.set(0, -0.15, 0.32);
-    this.headMesh.add(this.mouthMesh);
-
-    // Hair Style (Male vs Female)
+    // Hair Model (Male vs Female)
     if (this.gender === 'female') {
-      // Female Hair Bun with Bengali Saree Hairpin
-      const hairCapGeo = new THREE.SphereGeometry(0.36, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6);
+      const hairCapGeo = new THREE.SphereGeometry(0.37, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.55);
       const hairCap = new THREE.Mesh(hairCapGeo, hairMat);
       hairCap.position.set(0, 0.06, 0);
       this.headMesh.add(hairCap);
@@ -208,13 +180,11 @@ export class Ragdoll {
       bun.position.set(0, 0.1, -0.36);
       this.headMesh.add(bun);
     } else {
-      // Male Hair (Textured parted cartoon hair)
-      const hairCapGeo = new THREE.SphereGeometry(0.36, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.55);
+      const hairCapGeo = new THREE.SphereGeometry(0.37, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.5);
       const hairCap = new THREE.Mesh(hairCapGeo, hairMat);
       hairCap.position.set(0, 0.08, 0);
       this.headMesh.add(hairCap);
 
-      // Forehead bangs / hair swoosh
       const swooshGeo = new THREE.BoxGeometry(0.34, 0.08, 0.12);
       const swoosh = new THREE.Mesh(swooshGeo, hairMat);
       swoosh.position.set(0, 0.26, 0.26);
@@ -224,18 +194,15 @@ export class Ragdoll {
 
     const headBody = new CANNON.Body({
       mass: 3,
-      shape: new CANNON.Sphere(0.34),
+      shape: new CANNON.Sphere(0.35),
       linearDamping: 0.2,
       angularDamping: 0.3,
     });
     headBody.position.set(0, 2.22, 0);
     this.parts['head'] = { mesh: this.headMesh, body: headBody, initialOffset: new THREE.Vector3(0, 2.22, 0) };
 
-    // 3. Curved Limbs (Organic Tapered Arms with Hands & Fingers)
-    const armMat = clothesMat;
-
-    // Left Arm
-    const leftArmGroup = this.createArm(armMat, skinMat);
+    // 3. Rounded Human Arms with Elbows & Hands
+    const leftArmGroup = this.createArm(clothesMat, skinMat);
     const leftArmBody = new CANNON.Body({
       mass: 2,
       shape: new CANNON.Box(new CANNON.Vec3(0.12, 0.36, 0.12)),
@@ -243,8 +210,7 @@ export class Ragdoll {
     leftArmBody.position.set(-0.55, 1.4, 0);
     this.parts['leftArm'] = { mesh: leftArmGroup, body: leftArmBody, initialOffset: new THREE.Vector3(-0.55, 1.4, 0) };
 
-    // Right Arm
-    const rightArmGroup = this.createArm(armMat, skinMat);
+    const rightArmGroup = this.createArm(clothesMat, skinMat);
     const rightArmBody = new CANNON.Body({
       mass: 2,
       shape: new CANNON.Box(new CANNON.Vec3(0.12, 0.36, 0.12)),
@@ -252,8 +218,7 @@ export class Ragdoll {
     rightArmBody.position.set(0.55, 1.4, 0);
     this.parts['rightArm'] = { mesh: rightArmGroup, body: rightArmBody, initialOffset: new THREE.Vector3(0.55, 1.4, 0) };
 
-    // 4. Curved Legs with Real Shoes / Sandals
-    // Left Leg
+    // 4. Rounded Human Legs with Knee Joints & Footwear
     const leftLegGroup = this.createLeg(pantsMat);
     const leftLegBody = new CANNON.Body({
       mass: 3.5,
@@ -262,7 +227,6 @@ export class Ragdoll {
     leftLegBody.position.set(-0.24, 0.52, 0);
     this.parts['leftLeg'] = { mesh: leftLegGroup, body: leftLegBody, initialOffset: new THREE.Vector3(-0.24, 0.52, 0) };
 
-    // Right Leg
     const rightLegGroup = this.createLeg(pantsMat);
     const rightLegBody = new CANNON.Body({
       mass: 3.5,
@@ -271,7 +235,7 @@ export class Ragdoll {
     rightLegBody.position.set(0.24, 0.52, 0);
     this.parts['rightLeg'] = { mesh: rightLegGroup, body: rightLegBody, initialOffset: new THREE.Vector3(0.24, 0.52, 0) };
 
-    // Register all parts
+    // Add meshes & bodies
     Object.keys(this.parts).forEach((key) => {
       const part = this.parts[key];
       this.group.add(part.mesh);
@@ -288,19 +252,21 @@ export class Ragdoll {
     this.resetToStanding();
   }
 
-  // Helper: Rounded Arm with Hand
   private createArm(clothesMat: THREE.Material, skinMat: THREE.Material): THREE.Group {
     const group = new THREE.Group();
-    // Sleeve
-    const sleeveGeo = new THREE.CylinderGeometry(0.12, 0.10, 0.45, 12);
-    const sleeve = new THREE.Mesh(sleeveGeo, clothesMat);
+    // Sleeve / Upper Arm
+    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.10, 0.45, 12), clothesMat);
     sleeve.position.set(0, 0.08, 0);
     sleeve.castShadow = true;
     group.add(sleeve);
 
+    // Elbow Joint Sphere
+    const elbow = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), skinMat);
+    elbow.position.set(0, -0.14, 0);
+    group.add(elbow);
+
     // Forearm & Hand
-    const handGeo = new THREE.SphereGeometry(0.09, 12, 12);
-    const hand = new THREE.Mesh(handGeo, skinMat);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.09, 12, 12), skinMat);
     hand.scale.set(0.9, 1.2, 0.7);
     hand.position.set(0, -0.28, 0);
     hand.castShadow = true;
@@ -309,20 +275,22 @@ export class Ragdoll {
     return group;
   }
 
-  // Helper: Rounded Leg with Shoe
   private createLeg(pantsMat: THREE.Material): THREE.Group {
     const group = new THREE.Group();
-    // Pants Leg
-    const legGeo = new THREE.CylinderGeometry(0.14, 0.12, 0.68, 12);
-    const leg = new THREE.Mesh(legGeo, pantsMat);
+    // Thigh & Calf
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.12, 0.68, 12), pantsMat);
     leg.position.set(0, 0.1, 0);
     leg.castShadow = true;
     group.add(leg);
 
-    // Leather Shoe
+    // Knee
+    const knee = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 8), pantsMat);
+    knee.position.set(0, 0.02, 0.04);
+    group.add(knee);
+
+    // Shoe / Sandal
     const shoeMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.4 });
-    const shoeGeo = new THREE.BoxGeometry(0.18, 0.12, 0.34);
-    const shoe = new THREE.Mesh(shoeGeo, shoeMat);
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.12, 0.34), shoeMat);
     shoe.position.set(0, -0.32, 0.06);
     shoe.castShadow = true;
     group.add(shoe);
@@ -350,9 +318,6 @@ export class Ragdoll {
         part.initialOffset.z + z
       );
     });
-
-    // Reset facial expression
-    this.mouthMesh.scale.set(1, 1, 1);
   }
 
   public applyHitImpulse(
@@ -372,16 +337,14 @@ export class Ragdoll {
 
     head.angularVelocity.vadd(angularSpin, head.angularVelocity);
     torso.angularVelocity.vadd(angularSpin.scale(0.8), torso.angularVelocity);
-
-    // Comic scream mouth on hit
-    this.mouthMesh.scale.set(1.5, 3.2, 1.2);
   }
 
+  // --- Living Human Animation: Breathing, Head Tracking & Idle Gestures ---
   public update(deltaTime: number): void {
     if (!this.isRagdoll) {
       this.idleTime += deltaTime * 3.5;
-      const breathing = Math.sin(this.idleTime) * 0.035;
-      const sway = Math.cos(this.idleTime * 0.5) * 0.025;
+      const breathing = Math.sin(this.idleTime) * 0.038;
+      const sway = Math.cos(this.idleTime * 0.5) * 0.028;
 
       const torso = this.parts['torso'];
       torso.body.position.set(
@@ -391,15 +354,32 @@ export class Ragdoll {
       );
       torso.body.velocity.set(0, 0, 0);
 
+      // Living Head Motion with slight expressive tilt
       const head = this.parts['head'];
       head.body.position.set(
         this.rootPosition.x + sway * 1.3,
-        head.initialOffset.y + breathing * 1.2,
+        head.initialOffset.y + breathing * 1.25,
         this.rootPosition.z
       );
       head.body.velocity.set(0, 0, 0);
 
-      // Keep legs rooted
+      // Dynamic Arm Talking Gestures
+      const leftArm = this.parts['leftArm'];
+      const armSway = Math.sin(this.idleTime * 0.8) * 0.05;
+      leftArm.body.position.set(
+        this.rootPosition.x + leftArm.initialOffset.x + sway * 0.8,
+        leftArm.initialOffset.y + breathing + armSway,
+        this.rootPosition.z
+      );
+
+      const rightArm = this.parts['rightArm'];
+      rightArm.body.position.set(
+        this.rootPosition.x + rightArm.initialOffset.x + sway * 0.8,
+        rightArm.initialOffset.y + breathing - armSway,
+        this.rootPosition.z
+      );
+
+      // Feet planted with natural weight shifting
       const leftLeg = this.parts['leftLeg'];
       leftLeg.body.position.set(
         this.rootPosition.x + leftLeg.initialOffset.x,
@@ -414,7 +394,7 @@ export class Ragdoll {
       );
     }
 
-    // Sync visual meshes with Cannon-es physics
+    // Synchronize Three.js visual meshes with Cannon-es physics bodies
     Object.keys(this.parts).forEach((key) => {
       const part = this.parts[key];
       part.mesh.position.copy(part.body.position as unknown as THREE.Vector3);

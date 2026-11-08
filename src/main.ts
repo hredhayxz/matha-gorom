@@ -51,6 +51,9 @@ export class GameApp {
     this.ragdoll = this.characterFactory.createCharacter(this.currentCharacter);
     this.combatEngine = new CombatEngine(this.sceneManager);
     this.combatEngine.setRagdoll(this.ragdoll);
+    this.combatEngine.onCrowdCheer = () => {
+      this.soundEngine.playCrowdCheer();
+    };
     this.dizzyEffect.setRagdoll(this.ragdoll);
 
     // Interactive Drag & Fling Engine
@@ -89,6 +92,7 @@ export class GameApp {
     };
 
     this.initUI();
+    this.initSoundboardUI();
     this.showSpeech(this.currentCharacter.defaultDialogue);
 
     this.animate = this.animate.bind(this);
@@ -112,7 +116,6 @@ export class GameApp {
         this.sceneManager.triggerCameraShake(0.4);
         banner.style.display = 'none';
 
-        // Update active UI tab
         document.querySelectorAll('#character-scroller .char-card').forEach((c) => {
           if (c.getAttribute('data-id') === match.id) {
             c.classList.add('active');
@@ -123,7 +126,6 @@ export class GameApp {
       }
     };
 
-    // Auto dismiss after 9 seconds if not clicked
     setTimeout(() => {
       if (banner.style.display === 'flex') {
         banner.style.display = 'none';
@@ -214,6 +216,68 @@ export class GameApp {
     }
   }
 
+  // --- Dialogue Soundboard Drawer ---
+  private initSoundboardUI(): void {
+    const dialogueBtn = document.getElementById('dialogue-btn');
+    const dialogueModal = document.getElementById('dialogue-modal');
+    const closeBtn = document.getElementById('close-dialogue-btn');
+
+    dialogueBtn?.addEventListener('click', () => {
+      this.populateSoundboardGrid();
+      dialogueModal?.classList.add('active');
+    });
+
+    closeBtn?.addEventListener('click', () => {
+      dialogueModal?.classList.remove('active');
+    });
+
+    dialogueModal?.addEventListener('click', (e) => {
+      if (e.target === dialogueModal) {
+        dialogueModal.classList.remove('active');
+      }
+    });
+
+    this.populateSoundboardGrid();
+  }
+
+  private populateSoundboardGrid(): void {
+    const grid = document.getElementById('soundboard-grid');
+    if (!grid) return;
+
+    grid.innerHTML = '';
+    const dialogues = [
+      this.currentCharacter.defaultDialogue,
+      ...this.currentCharacter.hitDialogues,
+      'আমারে ছাইড়া দেন ওস্তাদ!',
+      'ট্যাকা ফেরত দিতাছি!',
+      'টিমওয়ার্ক ভাই!',
+      'জাস্ট ৫ মিনিটের একটা কল ভাই!',
+      'দলিল তো আমার নামে!',
+      'কোম্পানির খারাপ অবস্থা!',
+    ];
+
+    const uniqueDialogues = Array.from(new Set(dialogues));
+
+    uniqueDialogues.forEach((line) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn';
+      btn.style.textAlign = 'left';
+      btn.style.fontSize = '0.8rem';
+      btn.style.padding = '8px 10px';
+      btn.style.justifyContent = 'flex-start';
+      btn.innerHTML = `📢 "${line}"`;
+
+      btn.addEventListener('click', () => {
+        this.showSpeech(line);
+        this.soundEngine.speakBengaliVoice(line, this.currentCharacter.gender);
+        this.sceneManager.triggerCameraShake(0.12);
+        document.getElementById('dialogue-modal')?.classList.remove('active');
+      });
+
+      grid.appendChild(btn);
+    });
+  }
+
   private switchCharacter(char: CharacterDef): void {
     this.currentCharacter = char;
     this.ragdoll.destroy();
@@ -226,13 +290,13 @@ export class GameApp {
     this.showSpeech(char.defaultDialogue);
     this.soundEngine.speakBengaliVoice(char.defaultDialogue, char.gender);
     this.sceneManager.triggerCameraShake(0.2);
+    this.populateSoundboardGrid();
   }
 
   private handleHit(type: 'slap' | 'kick' | 'super'): void {
     const headPos = this.ragdoll.parts['head'].mesh.position;
     this.dizzyEffect.setVisible(true);
 
-    // Launch active weapon projectile
     if (this.weaponArsenal.activeWeapon !== 'hand') {
       this.weaponArsenal.launchWeapon(headPos);
       if (this.weaponArsenal.activeWeapon === 'chappal') {
@@ -244,7 +308,6 @@ export class GameApp {
       }
     }
 
-    // Trigger character-specific slapstick debris & sounds
     if (this.currentCharacter.id === 'colleague') {
       this.propsDebrisEngine.spawnKeyboardSmash(headPos);
       this.soundEngine.playKeyboardSmash();
@@ -255,7 +318,7 @@ export class GameApp {
     } else if (this.currentCharacter.id === 'boss') {
       if (this.characterFactory.chairBody) {
         this.characterFactory.chairBody.angularVelocity.set(0, 45, 0);
-        this.characterFactory.chairBody.velocity.set(6, 8, 4); // Launch towards roadside drain
+        this.characterFactory.chairBody.velocity.set(6, 8, 4);
         this.soundEngine.playWhistleLaunch();
       }
     } else if (this.currentCharacter.id === 'extortionist' || this.currentCharacter.id === 'manager') {
@@ -273,7 +336,6 @@ export class GameApp {
       this.soundEngine.playSuperFinisher();
     }
 
-    // Pick random Bengali hit reaction dialogue and speak with realistic gender tone
     const lines = this.currentCharacter.hitDialogues;
     const randomLine = lines[Math.floor(Math.random() * lines.length)];
     this.showSpeech(randomLine);

@@ -201,6 +201,7 @@ export class CharacterFactory {
     this.cleanupProps();
 
     const ragdoll = new Ragdoll(this.scene, this.physicsWorld, {
+      characterId: def.id,
       shirtColor: def.shirtColor,
       pantsColor: def.pantsColor,
       skinColor: def.skinColor,

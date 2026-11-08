@@ -96,3 +96,9 @@ A viral, production-grade, ultra-snappy 3D web comedy action ragdoll game set on
   - Live Dhaka street traffic circulation: moving local buses, CNGs, battery rickshaws, and sidewalk pedestrians
   - Authentic Dhaka vehicle audio: bus dual-tone electric air horns ("প্যাঁ-প্যাঁ-পোঁ!") and rickshaw brass bells ("টুং-টাং!")
   - Live Street Crime Confrontation System: dynamic crime alerts (highway wrong-way driving, tea stall extortion, weekend emergency calls) triggering live public justice!
+- [x] **Step 10: Full Human Graphics & Movement (Baper Rasta Aesthetic)**
+  - Procedural Rickshaw-Art stylized caricature face textures with bold ink outlines, expressive pupils, Dhakai mustaches, spectacles, and bindi
+  - Authentic Dhaka fabric patterns: green-checked lungi, magenta paisley saree, corporate pinstripe suit, and cotton panjabi
+  - Living organic human movement: breathing spine expansion, expressive head bobbing, arm talking gestures, and natural weight shifting
+  - Dialogue Soundboard drawer (`🎙️ ডায়লগ`) for on-demand playback of iconic viral Bengali lines
+  - Combo Hit Counter ("গণধোলাই কম্বো") with tiered comic titles and procedural crowd cheer chants ("মার মার! ধইরা মার!")

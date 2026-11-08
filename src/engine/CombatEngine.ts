@@ -16,6 +16,9 @@ export class CombatEngine {
   // Rage Meter ("মাথা গরম মিটার")
   public rage: number = 0; // 0 to 100
   public consecutiveHits: number = 0;
+  public comboCount: number = 0;
+  public lastHitTimestamp: number = 0;
+  public onCrowdCheer: (() => void) | null = null;
 
   // Bengali comic hit words
   private comicHitWords = [
@@ -182,9 +185,40 @@ export class CombatEngine {
   }
 
   private increaseRage(amount: number): void {
+    const now = performance.now();
+    if (now - this.lastHitTimestamp < 3500) {
+      this.comboCount++;
+    } else {
+      this.comboCount = 1;
+    }
+    this.lastHitTimestamp = now;
+
     this.rage = Math.min(this.rage + amount, 100);
     this.consecutiveHits++;
     this.updateRageUI();
+    this.updateComboUI();
+
+    // Trigger crowd cheer on milestones
+    if (this.comboCount > 0 && this.comboCount % 8 === 0 && this.onCrowdCheer) {
+      this.onCrowdCheer();
+    }
+  }
+
+  private updateComboUI(): void {
+    const comboBadge = document.getElementById('combo-badge');
+    if (!comboBadge) return;
+
+    if (this.comboCount >= 2) {
+      let tier = 'হালকা গরম 🔥';
+      if (this.comboCount >= 6) tier = 'উত্তপ্ত মাথা 💥';
+      if (this.comboCount >= 15) tier = 'মারাত্নক খেপার খেপছে ⚡';
+      if (this.comboCount >= 30) tier = 'সর্বকালের সেরা গণধোলাই 👑';
+
+      comboBadge.style.display = 'flex';
+      comboBadge.innerHTML = `<span>কম্বো x${this.comboCount}</span> <span style="font-size: 0.75rem; opacity: 0.9;">(${tier})</span>`;
+    } else {
+      comboBadge.style.display = 'none';
+    }
   }
 
   private updateRageUI(): void {
@@ -243,6 +277,12 @@ export class CombatEngine {
         this.isFrozen = false;
       }
       return;
+    }
+
+    // Check combo timeout
+    if (this.comboCount > 0 && performance.now() - this.lastHitTimestamp > 3500) {
+      this.comboCount = 0;
+      this.updateComboUI();
     }
 
     // Update particles

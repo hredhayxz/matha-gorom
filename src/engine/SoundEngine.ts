@@ -320,6 +320,39 @@ export class SoundEngine {
     this.playNoiseBurst(0.25, 0.8, 4800);
   }
 
+  // --- 4. Dhaka Street Crowd Cheer ("মার মার! ধইরা মার!") ---
+  public playCrowdCheer(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const t = this.ctx.currentTime;
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc1.type = 'sawtooth';
+    osc2.type = 'triangle';
+    osc1.frequency.setValueAtTime(180, t);
+    osc1.frequency.linearRampToValueAtTime(320, t + 0.45);
+    osc2.frequency.setValueAtTime(240, t);
+    osc2.frequency.linearRampToValueAtTime(420, t + 0.45);
+
+    gain.gain.setValueAtTime(0.18, t);
+    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.65);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc1.start(t);
+    osc2.start(t);
+    osc1.stop(t + 0.66);
+    osc2.stop(t + 0.66);
+
+    this.playNoiseBurst(0.65, 0.4, 1400);
+  }
+
   private playNoiseBurst(duration: number, volume: number, filterFreq: number): void {
     if (!this.ctx) return;
     const t = this.ctx.currentTime;
