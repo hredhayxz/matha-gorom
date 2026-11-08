@@ -102,3 +102,10 @@ A viral, production-grade, ultra-snappy 3D web comedy action ragdoll game set on
   - Living organic human movement: breathing spine expansion, expressive head bobbing, arm talking gestures, and natural weight shifting
   - Dialogue Soundboard drawer (`🎙️ ডায়লগ`) for on-demand playback of iconic viral Bengali lines
   - Combo Hit Counter ("গণধোলাই কম্বো") with tiered comic titles and procedural crowd cheer chants ("মার মার! ধইরা মার!")
+- [x] **Step 11: Baper Rasta Seamless Human Anatomy, Natural Locomotion & Dedicated Voice Engine**
+  - Seamless contoured human anatomy with smooth shoulder caps, elbow connectors, pelvis block, knee caps, and Bata footwear
+  - Comic ink outline cell-shading effect on all character meshes
+  - Sidewalk pacing locomotion, dynamic weight shifting, and breathing spine animation
+  - Dedicated `BanglaVoiceEngine` providing authentic male (deep chest resonance) and female (realistic auntie tone) vocal formant synthesis
+  - Interactive roadside drain water splash physics ("ছপাস! ড্রেনে পতন!") with water particles
+  - Dhaka Day, Sunset, and Neon-Night lighting cycle (`☀️ / 🌇 / 🌙`) with street lamp spotlights

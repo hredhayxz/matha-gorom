@@ -140,6 +140,17 @@ export class GameApp {
     const resetBtn = document.getElementById('reset-btn');
     const soundBtn = document.getElementById('sound-btn');
     const memeBtn = document.getElementById('share-meme-btn');
+    const timeBtn = document.getElementById('time-btn');
+
+    timeBtn?.addEventListener('click', () => {
+      const times: ('day' | 'dusk' | 'night')[] = ['day', 'dusk', 'night'];
+      const icons = { day: '☀️', dusk: '🌇', night: '🌙' };
+      const currentIdx = times.indexOf(this.sceneManager.currentTimeOfDay);
+      const nextTime = times[(currentIdx + 1) % times.length];
+      this.sceneManager.setTimeOfDay(nextTime);
+      if (timeBtn) timeBtn.innerText = icons[nextTime];
+      this.triggerHaptic(20);
+    });
 
     slapBtn?.addEventListener('click', () => {
       this.handleHit('slap');
@@ -293,9 +304,20 @@ export class GameApp {
     this.populateSoundboardGrid();
   }
 
+  private triggerHaptic(duration: number = 30): void {
+    if ('vibrate' in navigator) {
+      try {
+        navigator.vibrate(duration);
+      } catch {
+        // Ignored if user hasn't interacted or unsupported
+      }
+    }
+  }
+
   private handleHit(type: 'slap' | 'kick' | 'super'): void {
     const headPos = this.ragdoll.parts['head'].mesh.position;
     this.dizzyEffect.setVisible(true);
+    this.triggerHaptic(type === 'super' ? 80 : 35);
 
     if (this.weaponArsenal.activeWeapon !== 'hand') {
       this.weaponArsenal.launchWeapon(headPos);
@@ -372,6 +394,8 @@ export class GameApp {
     `;
   }
 
+  private hasSplashedDrain: boolean = false;
+
   private animate(currentTime: number): void {
     requestAnimationFrame(this.animate);
     const deltaTime = Math.min((currentTime - this.lastTime) / 1000, 0.1);
@@ -385,6 +409,22 @@ export class GameApp {
       this.weaponArsenal.update(deltaTime);
       this.trafficSystem.update(deltaTime);
       this.dizzyEffect.update(deltaTime);
+
+      // Check Roadside Drain Water Splash
+      const torsoPos = this.ragdoll.parts['torso'].mesh.position;
+      if (torsoPos.x > 4.6 && torsoPos.x < 7.2 && torsoPos.y < 0.4) {
+        if (!this.hasSplashedDrain) {
+          this.hasSplashedDrain = true;
+          this.sceneManager.spawnDrainWaterSplash(torsoPos);
+          this.soundEngine.playWaterSplash();
+          this.sceneManager.triggerCameraShake(0.5);
+          this.showSpeech('হায় হায়! ড্রেনের ময়লা পানিতে পড়লাম রে!');
+          this.soundEngine.speakBengaliVoice('হায় হায়! ড্রেনের পানিতে পড়লাম!', this.currentCharacter.gender);
+          this.triggerHaptic(60);
+        }
+      } else if (torsoPos.y > 0.8) {
+        this.hasSplashedDrain = false;
+      }
     }
 
     this.combatEngine.update(deltaTime);

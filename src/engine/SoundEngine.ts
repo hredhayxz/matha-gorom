@@ -1,10 +1,12 @@
+import { BanglaVoiceEngine } from './BanglaVoiceEngine';
+
 export class SoundEngine {
   private ctx: AudioContext | null = null;
   public isMuted: boolean = false;
-  private hasInitialized: boolean = false;
+  public voiceEngine: BanglaVoiceEngine;
 
   constructor() {
-    // AudioContext will be initialized on first user interaction
+    this.voiceEngine = new BanglaVoiceEngine();
   }
 
   private initContext(): void {
@@ -15,89 +17,19 @@ export class SoundEngine {
     if (this.ctx.state === 'suspended') {
       this.ctx.resume();
     }
-    this.hasInitialized = true;
   }
 
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
+    this.voiceEngine.setMuted(this.isMuted);
     return this.isMuted;
   }
 
   // --- 1. Realistic Bengali Voice Speech Engine (Male vs Female) ---
   public speakBengaliVoice(text: string, gender: 'male' | 'female' = 'male'): void {
     if (this.isMuted) return;
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel(); // Stop overlap
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      const voices = window.speechSynthesis.getVoices();
-
-      // Find authentic Bengali voices
-      const bengaliVoices = voices.filter(
-        (v) => v.lang.startsWith('bn') || v.lang.includes('Bengali') || v.name.toLowerCase().includes('bangla')
-      );
-
-      if (gender === 'female') {
-        // Realistic Female Voice
-        utterance.pitch = 1.15; // Natural realistic female pitch
-        utterance.rate = 1.05;  // Authentic gossipy conversational cadence
-        
-        // Match female voice if available in system
-        const femaleVoice = bengaliVoices.find(
-          (v) => v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') || v.name.includes('Aditi')
-        ) || bengaliVoices[0];
-
-        if (femaleVoice) utterance.voice = femaleVoice;
-      } else {
-        // Realistic Male Voice
-        utterance.pitch = 0.88; // Deep resonant natural adult male chest pitch
-        utterance.rate = 1.0;   // Confident/panicked human cadence
-        
-        // Match male voice if available
-        const maleVoice = bengaliVoices.find(
-          (v) => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('man') || v.name.includes('Kunal')
-        ) || bengaliVoices[0];
-
-        if (maleVoice) utterance.voice = maleVoice;
-      }
-
-      window.speechSynthesis.speak(utterance);
-    } else {
-      // Natural human formant synthesis fallback
-      this.playHumanVocalFormant(gender);
-    }
-  }
-
-  // Procedural Human Vocal Formant Synthesis (Glottal Pulse + F1/F2 Resonances)
-  private playHumanVocalFormant(gender: 'male' | 'female'): void {
-    if (!this.hasInitialized) return;
     this.initContext();
-    if (!this.ctx) return;
-
-    const t = this.ctx.currentTime;
-    const baseFreq = gender === 'female' ? 220 : 120; // Authentic male/female fundamental frequency F0
-
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    osc.type = 'sawtooth'; // Rich vocal tract harmonics
-    osc.frequency.setValueAtTime(baseFreq, t);
-
-    // Vocal Tract Formant Filter (Ah / Oh vowel formant simulation)
-    const filter = this.ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.frequency.setValueAtTime(gender === 'female' ? 950 : 700, t);
-    filter.Q.setValueAtTime(4.0, t);
-
-    gain.gain.setValueAtTime(0.2, t);
-    gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
-
-    osc.start(t);
-    osc.stop(t + 0.26);
+    this.voiceEngine.speak(text, gender);
   }
 
   // --- 2. Authentic Dhaka Vehicle Horns ---
@@ -320,7 +252,16 @@ export class SoundEngine {
     this.playNoiseBurst(0.25, 0.8, 4800);
   }
 
-  // --- 4. Dhaka Street Crowd Cheer ("মার মার! ধইরা মার!") ---
+  // --- 4. Roadside Drain Water Splash ("ছপাস!") ---
+  public playWaterSplash(): void {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    this.playNoiseBurst(0.35, 0.75, 1200);
+  }
+
+  // --- 5. Dhaka Street Crowd Cheer ("মার মার! ধইরা মার!") ---
   public playCrowdCheer(): void {
     if (this.isMuted) return;
     this.initContext();
