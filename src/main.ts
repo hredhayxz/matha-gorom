@@ -5,6 +5,7 @@ import { Ragdoll } from './engine/Ragdoll';
 import { CombatEngine } from './engine/CombatEngine';
 import { CharacterFactory, CHARACTER_CATALOG, CharacterDef } from './engine/CharacterFactory';
 import { PropsDebrisEngine } from './engine/PropsDebrisEngine';
+import { SoundEngine } from './engine/SoundEngine';
 
 export class GameApp {
   public sceneManager: SceneManager;
@@ -12,6 +13,7 @@ export class GameApp {
   public environment: Environment;
   public characterFactory: CharacterFactory;
   public propsDebrisEngine: PropsDebrisEngine;
+  public soundEngine: SoundEngine;
   public ragdoll: Ragdoll;
   public combatEngine: CombatEngine;
   public currentCharacter: CharacterDef = CHARACTER_CATALOG[0];
@@ -26,6 +28,7 @@ export class GameApp {
     this.environment = new Environment(this.sceneManager.scene, this.physicsWorld.world);
     this.characterFactory = new CharacterFactory(this.sceneManager.scene, this.physicsWorld.world);
     this.propsDebrisEngine = new PropsDebrisEngine(this.sceneManager.scene, this.physicsWorld.world);
+    this.soundEngine = new SoundEngine();
 
     // Initial character
     this.ragdoll = this.characterFactory.createCharacter(this.currentCharacter);
@@ -44,6 +47,7 @@ export class GameApp {
     const kickBtn = document.getElementById('kick-btn');
     const superBtn = document.getElementById('super-btn');
     const resetBtn = document.getElementById('reset-btn');
+    const soundBtn = document.getElementById('sound-btn');
 
     slapBtn?.addEventListener('click', () => {
       this.handleHit('slap');
@@ -61,6 +65,13 @@ export class GameApp {
       this.ragdoll.resetToStanding(0, 0);
       this.sceneManager.triggerCameraShake(0.1);
       this.showSpeech(this.currentCharacter.defaultDialogue);
+    });
+
+    soundBtn?.addEventListener('click', () => {
+      const isMuted = this.soundEngine.toggleMute();
+      if (soundBtn) {
+        soundBtn.innerText = isMuted ? '🔇' : '🔊';
+      }
     });
 
     // Populate character scroller
@@ -102,9 +113,10 @@ export class GameApp {
   private handleHit(type: 'slap' | 'kick' | 'super'): void {
     const headPos = this.ragdoll.parts['head'].mesh.position;
 
-    // Trigger character-specific slapstick debris
+    // Trigger character-specific slapstick debris & sounds
     if (this.currentCharacter.id === 'colleague') {
       this.propsDebrisEngine.spawnKeyboardSmash(headPos);
+      this.soundEngine.playKeyboardSmash();
     } else if (this.currentCharacter.id === 'neighbor') {
       this.propsDebrisEngine.spawnSweetBoxExplosion(headPos);
     } else if (this.currentCharacter.id === 'syndicate') {
@@ -113,21 +125,28 @@ export class GameApp {
       if (this.characterFactory.chairBody) {
         this.characterFactory.chairBody.angularVelocity.set(0, 45, 0);
         this.characterFactory.chairBody.velocity.set(6, 8, 4); // Launch towards roadside drain
+        this.soundEngine.playWhistleLaunch();
       }
+    } else if (this.currentCharacter.id === 'extortionist' || this.currentCharacter.id === 'manager') {
+      this.soundEngine.playMetallicClatter();
     }
 
     if (type === 'slap') {
       this.combatEngine.triggerSlap();
+      this.soundEngine.playSlap();
     } else if (type === 'kick') {
       this.combatEngine.triggerDropkick();
+      this.soundEngine.playDropkick();
     } else if (type === 'super') {
       this.combatEngine.triggerSuperFinisher();
+      this.soundEngine.playSuperFinisher();
     }
 
-    // Pick random Bengali hit reaction dialogue
+    // Pick random Bengali hit reaction dialogue and speak
     const lines = this.currentCharacter.hitDialogues;
     const randomLine = lines[Math.floor(Math.random() * lines.length)];
     this.showSpeech(randomLine);
+    this.soundEngine.speakBengaliVoice(randomLine);
   }
 
   private showSpeech(text: string): void {
@@ -136,7 +155,7 @@ export class GameApp {
 
     container.innerHTML = `
       <div style="
-        background: rgba(15, 23, 42, 0.92);
+        background: rgba(15, 23, 42, 0.94);
         color: #fef08a;
         padding: 10px 18px;
         border-radius: 20px;

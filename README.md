@@ -52,6 +52,12 @@ A viral, production-grade, ultra-snappy 3D web comedy action ragdoll game set on
   - "হাইওয়ের উল্টো অটো": Highway wrong-way auto driver with lungi and gamcha.
   - "পাতি চাঁদাবাজ": Extortionist knocked into dumpster.
   - "সিন্ডিকেট মজুতদার": Hoards onions & eggs, buried under flying onion sacks.
-- [ ] **Step 6: Web Audio Procedural Sounds & Bengali Voice Quips**
+- [x] **Step 6: Web Audio Procedural Sounds & Bengali Voice Quips**
+  - Web Audio API procedural sound synthesizer (100% offline, zero audio file downloads)
+  - Cartoon slap thud (pitch-swept sine oscillator + noise impulse)
+  - Heavy bass dropkick impact & cartoon whistle launches
+  - Resonant metallic dustbin clatters and keyboard snap clatter
+  - Cinematic Super Finisher ascending sawtooth riser & explosion
+  - Web SpeechSynthesis API Bengali voice quips with comical cartoon pitch & cartoon audio blips
 - [ ] **Step 7: Client-Side Face-Swap Tool & IndexedDB**
 - [ ] **Step 8: PWA Manifest & Service Worker Offline Cache**
